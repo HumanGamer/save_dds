@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <memory.h>
+#include <cstdio>
+#include <memory>
 
 #define STB_DXT_IMPLEMENTATION
 #pragma warning(push)
@@ -214,6 +214,51 @@ void savedds(const char* filename, const unsigned char* pData, int width, int he
         fwrite(dst, dstSize, 1, f);
         delete[] dst;
     }
+
+    fclose(f);
+}
+
+void savedds_to_memory(const unsigned char* pData, int width, int height, int bpp, unsigned char** outData, int* outSize)
+{
+    if (bpp != 24 && bpp != 32)
+        return;
+
+    if ((width % 4) || (height % 4))
+        return;
+
+    FILE* f = tmpfile();
+    if (!f)
+        return;
+
+    char filecode[5] = "DDS ";
+    fwrite(filecode, 4, 1, f);
+
+    DDSURFACEDESC2 ddsd;
+    memset(&ddsd, 0, sizeof(ddsd));
+    ddsd.dwSize = sizeof(ddsd);
+    ddsd.dwFlags = 0;
+    ddsd.dwWidth = width;
+    ddsd.dwHeight = height;
+    ddsd.lPitch = width * height;
+    ddsd.dwMipMapCount = 0;
+    ddsd.ddpfPixelFormat.dwSize = sizeof(ddsd.ddpfPixelFormat);
+    ddsd.ddpfPixelFormat.dwFlags = DDSF_FOURCC;
+    ddsd.ddpfPixelFormat.dwFourCC = bpp == 24 ? FOURCC_DXT1 : FOURCC_DXT5;
+    fwrite(&ddsd, sizeof(ddsd), 1, f);
+
+    int dstSize = 0;
+    unsigned char* dst = compress_to_dxt(pData, width, height, bpp, &dstSize);
+    if (dst)
+    {
+        fwrite(dst, dstSize, 1, f);
+        delete[] dst;
+    }
+
+    *outSize = ftell(f);
+    *outData = new unsigned char[*outSize];
+    rewind(f);
+
+    fread(*outData, *outSize, 1, f);
 
     fclose(f);
 }

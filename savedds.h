@@ -3,3 +3,4 @@
 // 32bpp is saved as DXT5
 // Note: no mipmap support currently
 void savedds(const char* filename, const unsigned char* pData, int width, int height, int bpp);
+void savedds_to_memory(const unsigned char* pData, int width, int height, int bpp, unsigned char** outData, int* outSize);
