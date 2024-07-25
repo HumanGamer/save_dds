@@ -136,6 +136,18 @@ typedef struct _DDSURFACEDESC2
     unsigned int               dwTextureStage;         // stage in multitexture cascade
 } DDSURFACEDESC2;
 
+enum DDSFlags
+{
+    DDSD_CAPS = 0x1,            // Required in every .dds file.
+    DDSD_HEIGHT = 0x2,          // Required in every .dds file.
+    DDSD_WIDTH = 0x4,           // Required in every .dds file.
+    DDSD_PITCH = 0x8,           // Required when pitch is provided for an uncompressed texture.
+    DDSD_PIXELFORMAT = 0x1000,  // Required in every .dds file.
+    DDSD_MIPMAPCOUNT = 0x20000, // Required in a mipmapped texture.
+    DDSD_LINEARSIZE = 0x80000,  // Required when pitch is provided for a compressed texture.
+    DDSD_DEPTH = 0x800000       // Required in a depth texture.
+};
+
 
 unsigned char* compress_to_dxt(const unsigned char* pData, int width, int height, int bpp, int* outDstSize)
 {
@@ -197,7 +209,7 @@ void savedds(const char* filename, const unsigned char* pData, int width, int he
     DDSURFACEDESC2 ddsd;
     memset(&ddsd, 0, sizeof(ddsd));
     ddsd.dwSize = sizeof(ddsd);
-    ddsd.dwFlags = 0;
+    ddsd.dwFlags = ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT | DDSD_LINEARSIZE;
     ddsd.dwWidth = width;
     ddsd.dwHeight = height;
     ddsd.lPitch = width * height;
@@ -236,7 +248,7 @@ void savedds_to_memory(const unsigned char* pData, int width, int height, int bp
     DDSURFACEDESC2 ddsd;
     memset(&ddsd, 0, sizeof(ddsd));
     ddsd.dwSize = sizeof(ddsd);
-    ddsd.dwFlags = 0;
+    ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT | DDSD_LINEARSIZE;
     ddsd.dwWidth = width;
     ddsd.dwHeight = height;
     ddsd.lPitch = width * height;
